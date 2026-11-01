@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2026 Label Viewer Project.
+ *
+ * Versión: 1.0.0
+ * Fecha: 2026-11-01
+ * Auditoría: Configuración de compilación Gradle con Spring Boot, Java 21/25, WebMVC,
+ *            Thymeleaf, OpenAPI (Swagger UI), Apache PDFBox y ZXing para renderizado ZPL.
+ */
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.duxman'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Documentación interactiva OpenAPI (Swagger)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    // Generación y manipulación de PDF
+    implementation 'org.apache.pdfbox:pdfbox:3.0.4'
+
+    // Generación de códigos de barras y QR en renderizado ZPL
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.google.zxing:javase:3.5.3'
+
+    // Pruebas (JUnit Jupiter y Mockito)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

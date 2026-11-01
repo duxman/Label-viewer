@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Label Viewer Project.
+
+  Versión: 1.0.0
+  Fecha: 2026-11-01
+  Auditoría: Interfaz gráfica web interactiva para visualización y renderizado de etiquetas ZPL.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Viewer - Renderizador ZPL</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 24px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 24px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .header-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 16px;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .header-links a:hover {
+            background-color: #f1f5f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        textarea {
+            width: 100%;
+            height: 240px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        input[type="number"], select, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        button.btn-primary {
+            width: 100%;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            margin-top: 10px;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #fecaca;
+        }
+
+        .preview-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: #f1f5f9;
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 500px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+
+        .meta-info {
+            margin-top: 12px;
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Label Viewer</h1>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">Visualizador y renderizador ZPL a PNG / PDF</p>
+    </div>
+    <div class="header-links">
+        <a href="/swagger-ui.html" target="_blank">&#128214; Documentación OpenAPI (Swagger)</a>
+    </div>
+</header>
+
+<div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+<div class="container">
+    <!-- Panel de Entrada de Parámetros -->
+    <div class="card">
+        <h2>Parámetros de la Etiqueta</h2>
+        <form method="post" action="/web/render" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="zpl">Código ZPL</label>
+                <textarea id="zpl" name="zpl" th:text="${zpl}" placeholder="Pegue aquí el código ZPL (^XA ... ^XZ)"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="file">O bien subir archivo ZPL (.zpl, .txt)</label>
+                <input type="file" id="file" name="file" accept=".zpl,.txt">
+            </div>
+
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="format">Formato</label>
+                    <select id="format" name="format">
+                        <option value="PNG" th:selected="${format == 'PNG'}">PNG (Imagen)</option>
+                        <option value="PDF" th:selected="${format == 'PDF'}">PDF (Documento)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="widthMm">Ancho (mm)</label>
+                    <input type="number" id="widthMm" name="widthMm" step="0.1" th:value="${widthMm}">
+                </div>
+                <div class="form-group">
+                    <label for="heightMm">Alto (mm)</label>
+                    <input type="number" id="heightMm" name="heightMm" step="0.1" th:value="${heightMm}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="dpi">Resolución (DPI)</label>
+                <select id="dpi" name="dpi">
+                    <option value="203" th:selected="${dpi == 203}">203 DPI (8 dots/mm - Estándar)</option>
+                    <option value="300" th:selected="${dpi == 300}">300 DPI (12 dots/mm)</option>
+                    <option value="600" th:selected="${dpi == 600}">600 DPI (24 dots/mm)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary">&#9654; Renderizar y Visualizar</button>
+        </form>
+    </div>
+
+    <!-- Panel de Previsualización -->
+    <div class="card">
+        <h2>Resultado de Previsualización</h2>
+        <div class="preview-box">
+            <div th:if="${hasResult}">
+                <!-- Si es PNG -->
+                <div th:if="${!isPdf}" style="text-align: center;">
+                    <img th:src="'data:image/png;base64,' + ${base64Data}" alt="Etiqueta renderizada">
+                </div>
+
+                <!-- Si es PDF -->
+                <div th:if="${isPdf}" style="text-align: center; width: 100%;">
+                    <iframe th:src="'data:application/pdf;base64,' + ${base64Data}" style="width: 100%; height: 450px; border: 1px solid var(--border);"></iframe>
+                </div>
+
+                <div class="meta-info">
+                    <p>
+                        <strong>Tiempo de renderizado:</strong> <span th:text="${executionMs}"></span> ms |
+                        <strong>Tamaño:</strong> <span th:text="${sizeBytes}"></span> bytes
+                    </p>
+                    <a th:href="'data:' + ${resultMime} + ';base64,' + ${base64Data}"
+                       th:download="${isPdf ? 'etiqueta.pdf' : 'etiqueta.png'}"
+                       style="display: inline-block; margin-top: 8px; color: var(--primary); text-decoration: none; font-weight: 600;">
+                        &#128190; Descargar Archivo Renderizado
+                    </a>
+                </div>
+            </div>
+
+            <div th:unless="${hasResult}" style="color: var(--text-muted); text-align: center;">
+                <p>Presione <strong>Renderizar y Visualizar</strong> para ver la etiqueta generada.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

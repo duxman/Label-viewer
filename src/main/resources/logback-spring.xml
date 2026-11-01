@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2026 Label Viewer Project.
+
+  Versión: 1.0.0
+  Fecha: 2026-11-01
+  Auditoría: Configuración de logging con SLF4J y Logback. Rotación diaria y límite de tamaño por fichero.
+-->
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <property name="LOG_DIR" value="logs" />
+    <property name="LOG_FILE_NAME" value="label-viewer" />
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+
+    <!-- Appender de consola -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Appender de fichero rotativo diario con límite por tamaño -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_FILE_NAME}.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Rotación diaria y numeración secuencial por archivo cuando se supera maxFileSize -->
+            <fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Tamaño máximo por archivo de log antes de rotar -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- Días de retención histórica -->
+            <maxHistory>30</maxHistory>
+            <!-- Límite global del espacio de logs -->
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Niveles de log específicos del paquete de la aplicación -->
+    <logger name="com.duxman.labelviewer" level="DEBUG" />
+
+    <!-- Nivel raíz -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+</configuration>

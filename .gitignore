@@ -3,6 +3,19 @@
 
 # Log file
 *.log
+logs/
+
+# Gradle & Build files
+.gradle/
+build/
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+bin/
 
 # BlueJ files
 *.ctxt
